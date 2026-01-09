@@ -102,11 +102,14 @@
         flex-direction: column;
         align-items: flex-end;
         gap: 1rem;
+        transition: all 0.3s ease;
     }
 
     #chat-window {
         width: 380px;
         height: 550px;
+        max-width: 90vw; /* Responsive constraint */
+        max-height: 70vh; /* Responsive constraint */
         background: var(--bg);
         border: 1px solid var(--border);
         border-radius: 24px;
@@ -171,6 +174,30 @@
     /* Toggle Switch */
     .toggle-checkbox:checked { right: 0; border-color: var(--accent); }
     .toggle-checkbox:checked + .toggle-label { background-color: var(--accent); }
+
+    /* --- MOBILE RESPONSIVENESS FIX --- */
+    @media (max-width: 640px) {
+        #ai-widget {
+            right: 1rem;
+            bottom: 1rem;
+            left: 1rem; /* Use full width container logic */
+            align-items: flex-end; /* Keep button right */
+        }
+        
+        #chat-window {
+            width: 100%; /* Fill available space */
+            max-width: 100%;
+            height: 60vh; /* Shorter height to avoid keyboard issues */
+            margin-bottom: 0.5rem;
+        }
+
+        /* Adjust main layout for mobile scrolling */
+        main {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+    }
 </style>
 </head>
 <body>
