@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -108,8 +107,8 @@
     #chat-window {
         width: 380px;
         height: 550px;
-        max-width: 90vw; /* Responsive constraint */
-        max-height: 70vh; /* Responsive constraint */
+        max-width: 90vw;
+        max-height: 70vh;
         background: var(--bg);
         border: 1px solid var(--border);
         border-radius: 24px;
@@ -171,32 +170,23 @@
     .typing-dot:nth-child(2) { animation-delay: -0.16s; }
     @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
-    /* Toggle Switch */
-    .toggle-checkbox:checked { right: 0; border-color: var(--accent); }
-    .toggle-checkbox:checked + .toggle-label { background-color: var(--accent); }
+    /* Custom Checkbox for Settings */
+    .toggle-checkbox { appearance: none; display: none; }
+    .toggle-label {
+        width: 40px; height: 24px; background: #e5e7eb; border-radius: 99px; position: relative; cursor: pointer; transition: 0.3s;
+    }
+    .toggle-label:after {
+        content: ''; width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .toggle-checkbox:checked + .toggle-label { background: var(--accent); }
+    .toggle-checkbox:checked + .toggle-label:after { transform: translateX(16px); }
+    .dark-mode .toggle-label { background: #333; }
 
-    /* --- MOBILE RESPONSIVENESS FIX --- */
+    /* Mobile */
     @media (max-width: 640px) {
-        #ai-widget {
-            right: 1rem;
-            bottom: 1rem;
-            left: 1rem; /* Use full width container logic */
-            align-items: flex-end; /* Keep button right */
-        }
-        
-        #chat-window {
-            width: 100%; /* Fill available space */
-            max-width: 100%;
-            height: 60vh; /* Shorter height to avoid keyboard issues */
-            margin-bottom: 0.5rem;
-        }
-
-        /* Adjust main layout for mobile scrolling */
-        main {
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
+        #ai-widget { right: 1rem; bottom: 1rem; left: 1rem; align-items: flex-end; }
+        #chat-window { width: 100%; max-width: 100%; height: 60vh; margin-bottom: 0.5rem; }
+        main { overflow-y: auto; display: flex; flex-direction: column; }
     }
 </style>
 </head>
@@ -204,45 +194,93 @@
 
 <!-- SETTINGS MODAL -->
 <div id="settings-modal" class="modal-overlay" onclick="closeSettings(event)">
-    <div class="card w-full max-w-md p-6 m-4" onclick="event.stopPropagation()">
+    <div class="card w-full max-w-md p-6 m-4 overflow-y-auto max-h-[90vh]" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-xl font-bold uppercase tracking-tight">Paramètres</h3>
             <button onclick="closeSettingsBtn()" class="text-gray-400 hover:text-red-500">✕</button>
         </div>
 
-        <div class="space-y-4">
-            <div class="flex justify-between items-center">
-                <span class="font-medium text-sm">Mode Sombre</span>
-                <button onclick="toggleTheme()" class="w-12 h-6 rounded-full bg-gray-200 relative transition-colors duration-200 focus:outline-none dark:bg-gray-700">
-                    <div id="theme-toggle-dot" class="w-4 h-4 rounded-full bg-white absolute top-1 left-1 transition-transform duration-200 shadow-sm"></div>
-                </button>
+        <div class="space-y-6">
+            
+            <!-- SECTION APPARENCE -->
+            <div>
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Apparence</h4>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-sm">Mode Sombre</span>
+                        <button onclick="toggleTheme()" class="w-12 h-6 rounded-full bg-gray-200 relative transition-colors duration-200 focus:outline-none dark:bg-gray-700">
+                            <div id="theme-toggle-dot" class="w-4 h-4 rounded-full bg-white absolute top-1 left-1 transition-transform duration-200 shadow-sm"></div>
+                        </button>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-sm">Afficher l'heure</span>
+                        <input type="checkbox" id="check-clock" class="toggle-checkbox" onchange="saveSettings()">
+                        <label for="check-clock" class="toggle-label"></label>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-sm">Temps révision total</span>
+                        <input type="checkbox" id="check-total" class="toggle-checkbox" onchange="saveSettings()">
+                        <label for="check-total" class="toggle-label"></label>
+                    </div>
+                </div>
             </div>
 
-            <div class="border-t border-gray-100 dark:border-gray-800 my-4"></div>
-            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Pomodoro (minutes)</h4>
+            <div class="border-t border-gray-100 dark:border-gray-800"></div>
 
-            <div class="grid grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-xs font-bold mb-1 text-gray-500">Travail</label>
-                    <input type="number" id="set-work" class="w-full p-2 rounded-lg border border-gray-200 bg-transparent font-bold text-center text-gray-900 dark:text-gray-100" value="25">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold mb-1 text-gray-500">Pause C.</label>
-                    <input type="number" id="set-short" class="w-full p-2 rounded-lg border border-gray-200 bg-transparent font-bold text-center text-gray-900 dark:text-gray-100" value="5">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold mb-1 text-gray-500">Pause L.</label>
-                    <input type="number" id="set-long" class="w-full p-2 rounded-lg border border-gray-200 bg-transparent font-bold text-center text-gray-900 dark:text-gray-100" value="15">
+            <!-- SECTION AUDIO -->
+            <div>
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Audio & Musique</h4>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-sm">Sons (Timer)</span>
+                        <input type="checkbox" id="check-sound" class="toggle-checkbox" onchange="saveSettings()">
+                        <label for="check-sound" class="toggle-label"></label>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="font-medium text-sm block">Musique d'ambiance</label>
+                        <select id="select-music" class="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-transparent text-sm focus:border-black dark:focus:border-white outline-none" onchange="saveSettings()">
+                            <option value="none">Aucune</option>
+                            <option value="rain">Pluie Intense</option>
+                            <option value="forest">Forêt & Nature</option>
+                            <option value="fire">Cheminée Crépitante</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="font-medium text-sm block">Volume Musique</label>
+                        <input type="range" id="range-volume" min="0" max="100" value="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" oninput="saveSettings()">
+                    </div>
                 </div>
             </div>
 
-            <div class="mt-4">
-                <label class="block text-xs font-bold mb-1 text-gray-500">Cycles avant Pause Longue</label>
-                <input type="number" id="set-cycles" class="w-full p-2 rounded-lg border border-gray-200 bg-transparent font-bold text-center text-gray-900 dark:text-gray-100" value="4">
+            <div class="border-t border-gray-100 dark:border-gray-800"></div>
+
+            <!-- SECTION TIMER -->
+            <div>
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Minuteur (minutes)</h4>
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold mb-1 text-gray-500">Travail</label>
+                        <input type="number" id="set-work" class="w-full p-2 rounded-lg border border-gray-200 bg-transparent font-bold text-center text-gray-900 dark:text-gray-100" value="25">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1 text-gray-500">Pause C.</label>
+                        <input type="number" id="set-short" class="w-full p-2 rounded-lg border border-gray-200 bg-transparent font-bold text-center text-gray-900 dark:text-gray-100" value="5">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1 text-gray-500">Pause L.</label>
+                        <input type="number" id="set-long" class="w-full p-2 rounded-lg border border-gray-200 bg-transparent font-bold text-center text-gray-900 dark:text-gray-100" value="15">
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-xs font-bold mb-1 text-gray-500">Cycles avant Pause Longue</label>
+                    <input type="number" id="set-cycles" class="w-full p-2 rounded-lg border border-gray-200 bg-transparent font-bold text-center text-gray-900 dark:text-gray-100" value="4">
+                </div>
             </div>
         </div>
 
-        <button onclick="saveSettings()" class="w-full mt-6 bg-black text-white dark:bg-white dark:text-black py-3 rounded-xl font-bold text-sm uppercase tracking-widest hover:opacity-90 transition">Enregistrer</button>
+        <button onclick="saveSettings(); closeSettingsBtn()" class="w-full mt-6 bg-black text-white dark:bg-white dark:text-black py-3 rounded-xl font-bold text-sm uppercase tracking-widest hover:opacity-90 transition">Enregistrer & Fermer</button>
     </div>
 </div>
 
@@ -252,12 +290,20 @@
         <a href="https://chpalitom09-bot.github.io/Wikimind/" target="_blank" class="w-10 h-10 bg-black text-white dark:bg-white dark:text-black rounded-xl flex items-center justify-center font-black text-xl hover:scale-105 transition shadow-lg no-underline cursor-pointer">W</a>
         <div>
             <h1 class="text-2xl font-black uppercase tracking-tighter italic">WikiMind <span class="text-gray-400 font-medium not-italic">Study</span></h1>
-            <p class="text-xs text-gray-400 tracking-wide font-medium">RÉVISER INTELLIGEMMENT. SANS SURCHARGE.</p>
+            <p class="text-xs text-gray-400 tracking-wide font-medium">RÉVISER INTELLIGEMMENT.</p>
         </div>
     </div>
-    <button onclick="openSettings()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 transition">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-    </button>
+
+    <div class="flex items-center gap-4">
+        <!-- Live Clock -->
+        <div id="live-clock" class="hidden font-mono font-bold text-lg md:text-xl tracking-tight text-gray-500 dark:text-gray-400">
+            00:00
+        </div>
+
+        <button onclick="openSettings()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        </button>
+    </div>
 </header>
 
 <main class="flex-grow p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto w-full h-full overflow-hidden">
@@ -292,9 +338,16 @@
             </div>
         </div>
         
-        <div class="mt-8 flex gap-2">
+        <div class="mt-8 flex flex-col items-center gap-4">
+            <!-- Cycle Dots -->
             <div id="cycle-dots" class="flex gap-2">
                 <!-- Généré par JS -->
+            </div>
+            
+            <!-- Music Controls Mini -->
+            <div id="mini-music-player" class="hidden flex items-center gap-3 bg-gray-100 dark:bg-zinc-800 px-4 py-2 rounded-full text-xs font-bold text-gray-500">
+                <span id="music-icon">🎵</span>
+                <span id="music-name">Musique active</span>
             </div>
         </div>
     </div>
@@ -316,12 +369,19 @@
                 <p class="text-sm font-medium">Aucune tâche prévue.</p>
                 <p class="text-xs mt-2">Demandez à l'IA d'organiser votre session.</p>
             </div>
-            <!-- Tasks will be injected here -->
         </div>
         
-        <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center text-xs font-bold text-gray-400">
-            <span>TOTAL: <span id="total-time">0h 00m</span></span>
-            <span id="finish-time">Fin estimée: --:--</span>
+        <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800 space-y-2">
+            <div class="flex justify-between items-center text-xs font-bold text-gray-400">
+                <span>PLANIFIÉ: <span id="total-time">0h 00m</span></span>
+                <span id="finish-time">Fin: --:--</span>
+            </div>
+            
+            <!-- Global Stats (Toggleable) -->
+            <div id="global-stats" class="hidden justify-between items-center text-xs font-bold text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-zinc-800 p-2 rounded-lg">
+                <span>⏱️ TEMPS RÉVISÉ TOTAL:</span>
+                <span id="global-revision-time">0h 00m</span>
+            </div>
         </div>
     </div>
 </main>
@@ -367,8 +427,8 @@
     </button>
 </div>
 
-<!-- AUDIO FOR TIMER -->
-<audio id="sound-complete" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU..."></audio> <!-- Fallback handled in JS -->
+<!-- AUDIO ELEMENTS -->
+<audio id="bg-music" loop></audio>
 
 <script>
     /**
@@ -385,7 +445,15 @@
             shortBreak: 5,
             longBreak: 15,
             cyclesBeforeLong: 4,
-            theme: 'light'
+            theme: 'light',
+            showClock: false,
+            showTotalTime: false,
+            soundEnabled: true,
+            musicTrack: 'none',
+            musicVolume: 50
+        },
+        stats: {
+            totalSeconds: 0 // Accumulated revision time
         },
         timer: {
             time: 25 * 60,
@@ -399,29 +467,36 @@
         chatHistory: []
     };
 
+    const MUSIC_SOURCES = {
+        rain: "https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg",
+        forest: "https://actions.google.com/sounds/v1/nature/forest_morning.ogg",
+        fire: "https://actions.google.com/sounds/v1/ambiences/fireplace.ogg"
+    };
+
     // --- LOCAL STORAGE ---
     function loadStorage() {
-        const saved = localStorage.getItem('wikimind_study_v2');
+        const saved = localStorage.getItem('wikimind_study_v3');
         if (saved) {
             const parsed = JSON.parse(saved);
             STATE.settings = { ...STATE.settings, ...parsed.settings };
+            STATE.stats = { ...STATE.stats, ...parsed.stats }; // Load total time
             STATE.tasks = parsed.tasks || [];
             
-            // Restore timer state if available, otherwise default logic applied in timer.init()
             if (parsed.timerState) {
                 STATE.timer.time = parsed.timerState.time;
                 STATE.timer.totalDuration = parsed.timerState.totalDuration;
                 STATE.timer.mode = parsed.timerState.mode;
                 STATE.timer.cycleCount = parsed.timerState.cycleCount;
-                // Note: We do NOT restore 'active' state to avoid auto-start on reload
             }
         }
         applyTheme(STATE.settings.theme);
+        applySettingsUI();
     }
 
     function saveStorage() {
-        localStorage.setItem('wikimind_study_v2', JSON.stringify({
+        localStorage.setItem('wikimind_study_v3', JSON.stringify({
             settings: STATE.settings,
+            stats: STATE.stats,
             tasks: STATE.tasks,
             timerState: {
                 time: STATE.timer.time,
@@ -430,6 +505,32 @@
                 cycleCount: STATE.timer.cycleCount
             }
         }));
+        updateGlobalStats();
+    }
+
+    // --- SETTINGS UI ---
+    function applySettingsUI() {
+        document.getElementById('check-clock').checked = STATE.settings.showClock;
+        document.getElementById('check-total').checked = STATE.settings.showTotalTime;
+        document.getElementById('check-sound').checked = STATE.settings.soundEnabled;
+        document.getElementById('select-music').value = STATE.settings.musicTrack;
+        document.getElementById('range-volume').value = STATE.settings.musicVolume;
+        
+        // Visibility
+        document.getElementById('live-clock').classList.toggle('hidden', !STATE.settings.showClock);
+        document.getElementById('global-stats').classList.toggle('hidden', !STATE.settings.showTotalTime);
+        
+        // Music Player State
+        musicManager.setVolume(STATE.settings.musicVolume);
+        
+        const miniPlayer = document.getElementById('mini-music-player');
+        if (STATE.settings.musicTrack !== 'none') {
+            miniPlayer.classList.remove('hidden');
+            const names = {rain: 'Pluie Intense', forest: 'Forêt', fire: 'Cheminée'};
+            document.getElementById('music-name').innerText = names[STATE.settings.musicTrack];
+        } else {
+            miniPlayer.classList.add('hidden');
+        }
     }
 
     // --- THEME ---
@@ -450,15 +551,44 @@
         saveStorage();
     }
 
+    // --- MUSIC MANAGER ---
+    const musicManager = {
+        audio: document.getElementById('bg-music'),
+        
+        load: function() {
+            if (STATE.settings.musicTrack !== 'none') {
+                this.audio.src = MUSIC_SOURCES[STATE.settings.musicTrack];
+                this.audio.volume = STATE.settings.musicVolume / 100;
+            } else {
+                this.audio.pause();
+                this.audio.src = "";
+            }
+        },
+
+        play: function() {
+            if (STATE.settings.musicTrack !== 'none' && this.audio.src) {
+                this.audio.play().catch(e => console.log("Audio play prevented until interaction"));
+            }
+        },
+
+        pause: function() {
+            this.audio.pause();
+        },
+
+        setVolume: function(val) {
+            this.audio.volume = val / 100;
+        }
+    };
+
     // --- TIMER ENGINE ---
     const timer = {
         init: function() {
-            // If STATE.timer.totalDuration is 0 (first load), set defaults
             if (STATE.timer.totalDuration === 0) {
                 this.setDurationBasedOnMode();
             }
             this.updateDisplay();
             this.renderDots();
+            musicManager.load();
         },
         
         toggle: function() {
@@ -476,13 +606,22 @@
             document.getElementById('icon-pause').classList.remove('hidden');
             document.getElementById('progress-ring').style.opacity = '1';
             
+            // Start Music if in Work Mode
+            if (STATE.timer.mode === 'work') musicManager.play();
+
             STATE.timer.interval = setInterval(() => {
                 STATE.timer.time--;
+                
+                // Increment global stats if working
+                if (STATE.timer.mode === 'work') {
+                    STATE.stats.totalSeconds = (STATE.stats.totalSeconds || 0) + 1;
+                    if (STATE.stats.totalSeconds % 60 === 0) saveStorage(); // Save periodically
+                }
+
                 if (STATE.timer.time <= 0) {
                     this.complete();
                 }
                 this.updateDisplay();
-                saveStorage(); // Persist active countdown
             }, 1000);
         },
 
@@ -494,6 +633,8 @@
             document.getElementById('icon-play').classList.remove('hidden');
             document.getElementById('icon-pause').classList.add('hidden');
             document.getElementById('progress-ring').style.opacity = '0.7';
+            
+            musicManager.pause();
             saveStorage();
         },
 
@@ -571,6 +712,8 @@
             const percent = 1 - (STATE.timer.time / STATE.timer.totalDuration);
             const offset = circumference - percent * circumference;
             ring.style.strokeDashoffset = offset;
+            
+            updateGlobalStats(); // Update UI for global stats
         },
 
         renderDots: function() {
@@ -584,15 +727,42 @@
         },
 
         playSound: function() {
+            if (!STATE.settings.soundEnabled) return;
+            
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(440, ctx.currentTime);
-            osc.connect(ctx.destination);
+            osc.frequency.setValueAtTime(440, ctx.currentTime); // A4
+            osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+            
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
             osc.start();
             osc.stop(ctx.currentTime + 0.5);
         }
     };
+
+    // --- HELPER: UPDATE GLOBAL STATS UI ---
+    function updateGlobalStats() {
+        if (!STATE.settings.showTotalTime) return;
+        const totalSec = STATE.stats.totalSeconds || 0;
+        const h = Math.floor(totalSec / 3600);
+        const m = Math.floor((totalSec % 3600) / 60);
+        document.getElementById('global-revision-time').innerText = `${h}h ${String(m).padStart(2,'0')}m`;
+    }
+
+    // --- LIVE CLOCK ---
+    setInterval(() => {
+        if(STATE.settings.showClock) {
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+    }, 1000);
 
     // --- TASK MANAGER ---
     const taskManager = {
@@ -609,7 +779,7 @@
             if (STATE.tasks.length === 0) {
                 empty.style.display = 'flex';
                 totalTimeEl.innerText = "0h 00m";
-                finishTimeEl.innerText = "Fin estimée: --:--";
+                finishTimeEl.innerText = "Fin: --:--";
             } else {
                 empty.style.display = 'none';
                 let totalMin = 0;
@@ -644,7 +814,7 @@
                 
                 const now = new Date();
                 now.setMinutes(now.getMinutes() + totalMin);
-                finishTimeEl.innerText = `Fin estimée: ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                finishTimeEl.innerText = `Fin: ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
             }
             saveStorage();
         },
@@ -862,19 +1032,34 @@
     function closeSettings(e) { if(e.target.id === 'settings-modal') closeSettingsBtn(); }
     
     function saveSettings() {
+        // Time Settings
         STATE.settings.workTime = parseInt(document.getElementById('set-work').value);
         STATE.settings.shortBreak = parseInt(document.getElementById('set-short').value);
         STATE.settings.longBreak = parseInt(document.getElementById('set-long').value);
         STATE.settings.cyclesBeforeLong = parseInt(document.getElementById('set-cycles').value);
         
+        // New Features Settings
+        STATE.settings.showClock = document.getElementById('check-clock').checked;
+        STATE.settings.showTotalTime = document.getElementById('check-total').checked;
+        STATE.settings.soundEnabled = document.getElementById('check-sound').checked;
+        STATE.settings.musicTrack = document.getElementById('select-music').value;
+        STATE.settings.musicVolume = parseInt(document.getElementById('range-volume').value);
+
         saveStorage();
+        applySettingsUI();
+        
+        // Music Logic
+        musicManager.load();
+        if(STATE.timer.active && STATE.timer.mode === 'work') {
+            musicManager.play();
+        } else {
+            musicManager.pause();
+        }
         
         // Immediate update of current timer state without reset
         timer.setDurationBasedOnMode();
         timer.updateDisplay();
         timer.renderDots();
-        
-        closeSettingsBtn();
     }
 
     // --- INITIALIZATION ---
